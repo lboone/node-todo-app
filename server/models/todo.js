@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-module.exports = mongoose.model('Todo',{
+var TodoSchema = mongoose.Schema({
     text: {
         type: String,
         required: true,
@@ -16,3 +16,5 @@ module.exports = mongoose.model('Todo',{
         default: null
     }
 });
+
+module.exports = mongoose.model('Todo',TodoSchema);

@@ -13,7 +13,7 @@ const port = process.env.PORT;
 app.use(bodyParser.json());
 
 
-// Add a new todo
+// All the todo routes
 app.post('/todos',(req,res)=>{
     var todo = new Todo({
         text: req.body.text
@@ -25,8 +25,6 @@ app.post('/todos',(req,res)=>{
         res.status(400).send(e);
     });
 });
-
-// Get all todos
 app.get('/todos',(req,res)=>{
     Todo.find().then((todos)=>{
         res.send({todos});
@@ -34,7 +32,6 @@ app.get('/todos',(req,res)=>{
         res.status(400).send(err);
     });
 });
-
 app.get('/todos/:id',(req,res)=>{
     var id = req.params.id;
     if(ObjectID.isValid(id)){
@@ -49,7 +46,6 @@ app.get('/todos/:id',(req,res)=>{
         res.status(404).send({'Error':'ID not valid!'});
     }
 });
-
 app.delete('/todos/:id',(req,res)=>{
     var id = req.params.id;
     if(ObjectID.isValid(id)){
@@ -64,7 +60,6 @@ app.delete('/todos/:id',(req,res)=>{
         res.status(404).send({'Error':'ID not valid!'});
     }
 });
-
 app.patch('/todos/:id',(req,res)=>{
     var id = req.params.id;
     if(ObjectID.isValid(id)){
@@ -88,6 +83,22 @@ app.patch('/todos/:id',(req,res)=>{
     }
 });
 
+// All the user routes
+// Signup
+app.post('/users',(req,res)=>{
+    var body = _.pick(req.body,['email','password']);
+    var user = new User(body);
+    user.save().then(()=>{
+        return user.generateAuthToken();
+    }).then((token) => {
+        res.header('x-auth', token).send({user})
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+});
+
+
+// Start the server
 app.listen(port,() => {
     console.log(`Started on port ${port}`);
 });
