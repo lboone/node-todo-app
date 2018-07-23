@@ -103,13 +103,22 @@ describe('GET /todos/:id',()=>{
 
 describe('DELETE /todos/:id',()=>{
     it('should delete and return todo doc',(done) => {
+        var hexId = todos[0]._id.toHexString();
         request(app)
-            .delete(`/todos/${todos[0]._id.toHexString()}`)
+            .delete(`/todos/${hexId}`)
             .expect(200)
             .expect((res) => {
-                expect(res.body.todo.text).toBe(todos[0].text);
+                expect(res.body.todo._id).toBe(hexId);
             })
-            .end(done);
+            .end((err, res) => {
+                if(err) {
+                    return done(err);
+                }
+                Todo.findById(hexId).then((todo) => {
+                    expect(todo).toBeFalsy();
+                    done();
+                }).catch((err)=> done(err));
+            });
 
     });
     
