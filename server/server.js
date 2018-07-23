@@ -5,6 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 var {ObjectID,Todo, User} = require('./models');
+const {authenticate} = require('./middleware/authenticate');
 
 var app = express();
 const port = process.env.PORT;
@@ -95,6 +96,13 @@ app.post('/users',(req,res)=>{
     }).catch((e) => {
         res.status(400).send(e);
     });
+});
+
+
+// Login
+app.get('/users/me',authenticate, (req,res)=>{
+    var user = req.user;
+    res.send({user});
 });
 
 
