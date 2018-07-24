@@ -99,12 +99,22 @@ app.post('/users',(req,res)=>{
 });
 
 
-// Login
+// User Profile
 app.get('/users/me',authenticate, (req,res)=>{
     var user = req.user;
     res.send({user});
 });
 
+app.post('/users/login',(req,res)=>{
+    var body = _.pick(req.body,['email','password']);
+    User.findByCredentials(body.email,body.password).then((user) => {
+        return user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send({user})
+        });
+    }).catch((e) => {
+        res.status(400).send({'Error':'A user with that email and password does not exist'});
+    });
+});
 
 // Start the server
 app.listen(port,() => {
