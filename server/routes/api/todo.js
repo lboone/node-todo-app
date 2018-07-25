@@ -11,9 +11,10 @@ module.exports = (function(){
     // Route: /todos
     // Parameters
     // text: required
-    apiTodo.post('/',(req,res)=>{
+    apiTodo.post('/',authenticate,(req,res)=>{
         var todo = new Todo({
-            text: req.body.text
+            text: req.body.text,
+            _creator: req.user._id
         });
         todo.save().then((todo) => {
             res.send({todo});
@@ -26,8 +27,10 @@ module.exports = (function(){
     // Route: /todos
     // Parameters
     // none
-    apiTodo.get('/',(req,res)=>{
-        Todo.find().then((todos)=>{
+    apiTodo.get('/',authenticate,(req,res)=>{
+        Todo.find({
+            _creator: req.user._id
+        }).then((todos)=>{
             res.send({todos});
         },(err)=>{
             res.status(400).send(err);
@@ -37,7 +40,7 @@ module.exports = (function(){
     // Route: /todos/:id
     // Parameters
     // id: required
-    apiTodo.get('/:id',(req,res)=>{
+    apiTodo.get('/:id',authenticate,(req,res)=>{
         var id = req.params.id;
         if(ObjectID.isValid(id)){
             Todo.findById(id).then((todo)=>{
@@ -55,7 +58,7 @@ module.exports = (function(){
     // Rooute: /todos/:id
     // Parameters
     // id: required
-    apiTodo.delete('/:id',(req,res)=>{
+    apiTodo.delete('/:id',authenticate,(req,res)=>{
         var id = req.params.id;
         if(ObjectID.isValid(id)){
             Todo.findByIdAndDelete(id).then((todo)=>{
@@ -75,7 +78,7 @@ module.exports = (function(){
     // id: required
     // text: optional
     // completed: optional
-    apiTodo.patch('/:id',(req,res)=>{
+    apiTodo.patch('/:id',authenticate,(req,res)=>{
         var id = req.params.id;
         if(ObjectID.isValid(id)){
             var body = _.pick(req.body, ['text','completed']);

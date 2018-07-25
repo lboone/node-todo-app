@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const User = require('./user');
+
+const _ = require('lodash');
 
 var TodoSchema = mongoose.Schema({
     text: {
@@ -14,6 +17,10 @@ var TodoSchema = mongoose.Schema({
     completedAt: {
         type: Number,
         default: null
+    },
+    _creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
     }
 });
 
