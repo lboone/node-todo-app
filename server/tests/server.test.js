@@ -160,7 +160,6 @@ describe('PATCH /todos/:id',() => {
             .end(done);
     });
 });
-
 describe('GET /users/me', () =>{
     it('should return user is authenticated', (done) => {
         request(app)
@@ -183,7 +182,6 @@ describe('GET /users/me', () =>{
             .end(done);
     });
 });
-
 describe('POST /users',() => {
     it('should create a user',(done) => {
         var email = 'example@example.com';
@@ -234,7 +232,6 @@ describe('POST /users',() => {
             .end(done);
     });
 });
-
 describe('POST /users/login', () => {
     it('should login user and return auth token', (done) => {
         var email = users[1].email;
@@ -281,7 +278,6 @@ describe('POST /users/login', () => {
             });
     });
 });
-
 describe('DELETE /users/me/token',() => {
     it('should remove auth token on logout', (done) => {
         request(app)
@@ -301,4 +297,4 @@ describe('DELETE /users/me/token',() => {
                 }).catch((e) => done(e));
             });
     });
-})
+});
