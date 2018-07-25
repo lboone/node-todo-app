@@ -43,7 +43,10 @@ module.exports = (function(){
     apiTodo.get('/:id',authenticate,(req,res)=>{
         var id = req.params.id;
         if(ObjectID.isValid(id)){
-            Todo.findById(id).then((todo)=>{
+            Todo.findOne({
+                _id: id,
+                _creator: req.user._id
+            }).then((todo)=>{
                 if(!todo){
                     res.status(404).send({'Error':'Todo not found!'});
                 } else {
@@ -61,7 +64,10 @@ module.exports = (function(){
     apiTodo.delete('/:id',authenticate,(req,res)=>{
         var id = req.params.id;
         if(ObjectID.isValid(id)){
-            Todo.findByIdAndDelete(id).then((todo)=>{
+            Todo.findOneAndDelete({
+                _id:id,
+                _creator: req.user._id
+            }).then((todo)=>{
                 if(!todo){
                     res.status(404).send({'Error':'Todo not found!'});
                 } else {
@@ -89,7 +95,10 @@ module.exports = (function(){
                 body.completed = false;
                 body.completedAt = null;
             }
-            Todo.findByIdAndUpdate(id,{$set:body},{new: true}).then((todo) => {
+            Todo.findOneAndUpdate({
+                _id: id,
+                _creator: req.user._id
+            },{$set:body},{new: true}).then((todo) => {
                 if(!todo){
                     return res.status(404).send({'Error':'Todo does not exist'});
                 }
