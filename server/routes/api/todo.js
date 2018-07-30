@@ -11,71 +11,76 @@ module.exports = (function(){
     // Route: /todos
     // Parameters
     // text: required
-    apiTodo.post('/',authenticate,(req,res)=>{
-        var todo = new Todo({
-            text: req.body.text,
-            _creator: req.user._id
-        });
-        todo.save().then((todo) => {
+    apiTodo.post('/',authenticate, async (req,res)=>{
+        try{
+            var newTodo = new Todo({
+                text: req.body.text,
+                _creator: req.user._id
+            });
+            var todo = await newTodo.save();
             res.send({todo});
-        }, (e) => {
-            
+        } catch(e) {
             res.status(400).send(e);
-        });
+        }
     });
 
     // Route: /todos
     // Parameters
     // none
-    apiTodo.get('/',authenticate,(req,res)=>{
-        Todo.find({
-            _creator: req.user._id
-        }).then((todos)=>{
+    apiTodo.get('/',authenticate, async (req,res)=>{
+        try {
+            const todos = await Todo.find({
+                _creator: req.user._id
+            });
             res.send({todos});
-        },(err)=>{
+        } catch(e) {
             res.status(400).send(err);
-        });
+        }
     });
 
     // Route: /todos/:id
     // Parameters
     // id: required
-    apiTodo.get('/:id',authenticate,(req,res)=>{
-        var id = req.params.id;
-        if(ObjectID.isValid(id)){
-            Todo.findOne({
+    apiTodo.get('/:id',authenticate, async (req,res)=>{
+        const id = req.params.id;
+        if(!ObjectID.isValid(id)){
+            return res.status(404).send({'Error':'ID not valid!'}); 
+        }
+        try {
+            const todo = await Todo.findOne({
                 _id: id,
                 _creator: req.user._id
-            }).then((todo)=>{
-                if(!todo){
-                    res.status(404).send({'Error':'Todo not found!'});
-                } else {
-                    res.send({todo});
-                }
-            }).catch((error) => res.status(400).send({'Error':error}));
-        } else {
-            res.status(404).send({'Error':'ID not valid!'});
+            });
+            if(!todo){
+                res.status(404).send({'Error':'Todo not found!'});
+            } else {
+                res.send({todo});
+            }
+        } catch (error) {
+            res.status(400).send({'Error':error});
         }
     });
 
     // Rooute: /todos/:id
     // Parameters
     // id: required
-    apiTodo.delete('/:id',authenticate,(req,res)=>{
+    apiTodo.delete('/:id',authenticate,async (req,res)=>{
         var id = req.params.id;
-        if(ObjectID.isValid(id)){
-            Todo.findOneAndDelete({
+        if(!ObjectID.isValid(id)){
+            return res.status(404).send({'Error':'ID not valid!'});
+        }
+        try {
+            const todo = await Todo.findOneAndDelete({
                 _id:id,
                 _creator: req.user._id
-            }).then((todo)=>{
-                if(!todo){
-                    res.status(404).send({'Error':'Todo not found!'});
-                } else {
-                    res.send({todo});
-                }
-            }).catch((error) => res.status(400).send({'Error':error}));
-        } else {
-            res.status(404).send({'Error':'ID not valid!'});
+            });
+            if(!todo){
+                res.status(404).send({'Error':'Todo not found!'});
+            } else {
+                res.send({todo});
+            }
+        } catch(error) {
+            res.status(400).send({'Error':error});
         }
     });
 
@@ -84,30 +89,31 @@ module.exports = (function(){
     // id: required
     // text: optional
     // completed: optional
-    apiTodo.patch('/:id',authenticate,(req,res)=>{
-        var id = req.params.id;
-        if(ObjectID.isValid(id)){
-            var body = _.pick(req.body, ['text','completed']);
-            
-            if(_.isBoolean(body.completed) && body.completed){
-                body.completedAt = new Date().getTime();
-            } else {
-                body.completed = false;
-                body.completedAt = null;
-            }
-            Todo.findOneAndUpdate({
-                _id: id,
-                _creator: req.user._id
-            },{$set:body},{new: true}).then((todo) => {
-                if(!todo){
-                    return res.status(404).send({'Error':'Todo does not exist'});
-                }
-                res.send((todo));
-            }).catch((e) => res.status(400).send());
-        } else {
+    apiTodo.patch('/:id',authenticate,async (req,res)=>{
+        let id = req.params.id;
+        if(!ObjectID.isValid(id)){
             return res.status(404).send({'Error':'ID not valid!'});
         }
+        let body = _.pick(req.body, ['text','completed']);
+        if(_.isBoolean(body.completed) && body.completed){
+            body.completedAt = new Date().getTime();
+        } else {
+            body.completed = false;
+            body.completedAt = null;
+        }
+        try {   
+            const todo = await Todo.findOneAndUpdate({
+                _id: id,
+                _creator: req.user._id
+            },{$set:body},{new: true});
+            if(!todo){
+                res.status(404).send({'Error':'Todo does not exist'});
+            } else {
+                res.send((todo));
+            }
+        } catch(error) {
+            res.status(400).send({'Error':error});
+        }
     });
-
     return apiTodo;
 })();
