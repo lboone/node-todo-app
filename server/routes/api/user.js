@@ -52,7 +52,6 @@ module.exports = (function(){
     // none
     // header: x-auth - auth key
     apiUser.delete('/me/token',authenticate, async (req,res) => {
-        
         try {
             await req.user.removeToken(req.token);
         res.status(200).send({'Success':'You have successfully removed the token'});
